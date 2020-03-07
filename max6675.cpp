@@ -22,13 +22,18 @@ MAX6675::MAX6675(int8_t SCLK, int8_t CS, int8_t MISO) {
 
   digitalWrite(cs, HIGH);
 }
+
+/**
+	Returns a temperature in Celsius
+	~130 times faster.
+	@return temperature in degree Celsius
+*/
 double MAX6675::readCelsius(void) {
 
   uint16_t v;
 
   digitalWrite(cs, LOW);
-  _delay_ms(1);
-
+  delayMicroseconds(1);
   v = spiread();
   v <<= 8;
   v |= spiread();
@@ -46,10 +51,26 @@ double MAX6675::readCelsius(void) {
   return v*0.25;
 }
 
+/**
+	Returns a temperature in Celsius
+	~130 times faster.
+	@return temperature in tenths of degree Celsius
+*/
+int MAX6675::readTenthsOfCelsius() {
+	double x = readCelsius();
+	int z = (int) (x * 10);
+	return z;
+
+}
+
 double MAX6675::readFahrenheit(void) {
   return readCelsius() * 9.0/5.0 + 32;
 }
 
+/**
+	Read 1 byte from SW SPI ~130 times faster.
+	@return 1 byte
+*/
 byte MAX6675::spiread(void) { 
   int i;
   byte d = 0;
@@ -57,14 +78,15 @@ byte MAX6675::spiread(void) {
   for (i=7; i>=0; i--)
   {
     digitalWrite(sclk, LOW);
-    _delay_ms(1);
+    
+	delayMicroseconds(1);
     if (digitalRead(miso)) {
       //set the bit to 0 no matter what
       d |= (1 << i);
     }
 
     digitalWrite(sclk, HIGH);
-    _delay_ms(1);
+    delayMicroseconds(1);
   }
 
   return d;
